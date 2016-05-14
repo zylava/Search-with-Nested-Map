@@ -1,5 +1,6 @@
 CXX=g++
 CXXFLAGS = -std=c++0x -I/usr/local/include
+GENERATED = 2014-10-31
 
 all: query.sh generate.sh
 
@@ -10,4 +11,4 @@ generate.sh:
 	$(CXX) -o generate.sh $^ $(CXXFLAGS) generate.cpp
 
 clean:
-	rm -rf *.o *~ 2014-10-31 *.sh
+	rm -rf *.o *~ $(GENERATED) *.sh
