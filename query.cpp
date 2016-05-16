@@ -35,6 +35,10 @@ typedef std::map<std::string, InnerMap> MiddleMap;
 ///maps timestamp to cpu usage
 typedef std::map<int, MiddleMap> OuterMap;
 
+///whether or not suitable files exist in the path specified
+bool file_exists = false;
+
+
 /*!
  This function splits a strings into a set of strings by a string specified
  @param str the string to be separated
@@ -138,6 +142,7 @@ void mapSetup(std::string full_file_name, OuterMap &cpu_map){
     std::ifstream ifs(full_file_name.c_str());
     std::string line;
     while (std::getline(ifs, line)){
+        file_exists = true;
         if(ifs.eof()){
             break;
         }
@@ -264,7 +269,7 @@ void putResult(std::string &result, bool &found, const unsigned long time_lower,
                     result = result + "(" + std::to_string(time_info.tm_year + 1900) + "-" + std::to_string(time_info.tm_mon + 1) + "-" + std::to_string(time_info.tm_mday) + " ";
                     std::string hr = std::to_string(time_info.tm_hour);
                     std::string m = std::to_string(time_info.tm_min);
- 
+                    
                     //makes sure min and hour always have 2 digits
                     if(hr.length() == 1){
                         hr = "0" + hr;
@@ -278,7 +283,7 @@ void putResult(std::string &result, bool &found, const unsigned long time_lower,
             }
         }
     }
- }
+}
 
 int main(int argc, const char * argv[]) {
     
@@ -309,7 +314,7 @@ int main(int argc, const char * argv[]) {
         std::cerr << "Cannot open directory!" << std::endl;
         return -1;
     }
-    
+
     while((dir_struct = readdir(dir))){
         
         std::string file_name(dir_struct->d_name);
@@ -322,7 +327,7 @@ int main(int argc, const char * argv[]) {
         }
         
         mapSetup(full_file_name, cpu_map);
-
+        
         
         std::string user_input;
         
@@ -359,6 +364,7 @@ int main(int argc, const char * argv[]) {
                 }
                 
                 if(!(check_IP_format(strings[1]))){
+                    std::cerr << "Bad IP address. Please try again." << std::endl;
                     continue;
                 }
                 
@@ -387,11 +393,11 @@ int main(int argc, const char * argv[]) {
                 
                 OuterMap::iterator out = cpu_map.find(cpu);
                 result = result + std::to_string(cpu) + " usage on " + ip + ": \n";
-
+                
                 bool found = false;
                 
                 putResult(result, found, time_lower, time_upper, cpu_map, cpu, ip);
-
+                
                 if(found == true){
                     std::cout << result << std::endl;
                 }
@@ -410,7 +416,9 @@ int main(int argc, const char * argv[]) {
             
         }
         
-        
-        return 0;
     }
+    if (!file_exists){
+        std::cerr << "No suitable input file was found." << std::endl;
+    }
+    return 0;
 }
